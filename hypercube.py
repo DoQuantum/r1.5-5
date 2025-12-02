@@ -1,10 +1,11 @@
 from sympy.combinatorics import Permutation
+from random import shuffle
 import math
 
 from print import print_r
 
 def get_kth_bit(n, k):
-	return n >> k & 1;
+	return n >> k & 1
 	#return int(n/math.pow(2, k))%2
 
 def generate_swaps(red, green, blue):
@@ -30,9 +31,7 @@ def generate_swaps(red, green, blue):
 		found.add(i)
 		next = red[i]
 		#iterate through cycle containing current red edge
-		while(True):
-			if(next in found):
-				break
+		while(not(next in found)):
 			if(last_green):
 				if(blue[next] == -1):
 					found.add(next)
@@ -42,6 +41,7 @@ def generate_swaps(red, green, blue):
 				else:
 					next = blue[next]
 					last_green = False
+					
 			else:
 				if(parity):
 					matching1.add((next, green[next]))
@@ -62,7 +62,7 @@ def generate_swaps(red, green, blue):
 	#return green edges in perfect matching
 	return sigma1
 
-def route(target:list[int]):
+def route(initial_state:list[int]):
 	"""
 	generate a list of pairwise swaps optimally
 
@@ -72,7 +72,7 @@ def route(target:list[int]):
 	# get shape of grid
 	# assume rows >= cols
 	# both of form 2^k or 2^k & 2^(k+1)
-	l = len(target)
+	l = len(initial_state)
 	l_len = math.log2(l) / 2
 	if l_len % 1 == 0.5:
 		rows = 2 ** int(math.ceil(l_len))
@@ -83,11 +83,11 @@ def route(target:list[int]):
 	# dimension of hypercube
 	dim = int(math.log2(l))
 
-	# what the final permutation composition should look like
-	final = target
+	# state of the actual atom array
+	array_state = initial_state
 
-	# permutation representation of final state
-	sigma = Permutation(final)
+	# target permutation
+	sigma = Permutation(initial_state)
 
 	# color template with no swaps
 	blank = [-1] * l
@@ -97,8 +97,8 @@ def route(target:list[int]):
 
 	# over every bit in the destination location bitstring (backwards)
 	for bit in reversed(range(dim)):
-		arr_n = sigma.array_form
-		#print(arr_n)
+		sigma_arr = sigma.array_form
+		#print(sigma_arr)
 
 		green = blank.copy()
 		red = blank.copy()
@@ -113,10 +113,10 @@ def route(target:list[int]):
 				green[i] = i + 2**bit # +add vs ^xor is the same because i[bit]==0
 				green[i + 2**bit] = i
 
-			# red/blue edges: current destination bit differs
-			if get_kth_bit(arr_n[i], bit) == 0:
-				#O(n) search, can probably optimize
-				match = arr_n.index(arr_n[i] + 2**bit)
+			# red/blue edges: destination bit differs
+			if get_kth_bit(sigma_arr[i], bit) == 0:
+				#O(n) search, need to optimize
+				match = sigma_arr.index(sigma_arr[i] + 2**bit)
 
 				# red: different destination bit, same at current bit
 				# blue: different destination and current bit
@@ -126,26 +126,33 @@ def route(target:list[int]):
 				else:
 					blue[i] = match
 					blue[match] = i
-		
+		# swaps in current step in array and cyclic form
 		bit_swaps = generate_swaps(red, green, blue)
 		sigma1 = Permutation(bit_swaps)
 		print(sigma1)
+		#perform sigma1 on the "physical array" and update sigma for the "recursive step"
 		sigma = sigma1 * sigma * sigma1
-		final = sigma1(final)
-		
-
-	arr_n = final
+		array_state = sigma1(array_state)
+		print(array_state)
+	
+	#Pairs on the wrong side of the cut are swapped
+	#Reverse order of the matching step to mimic recursive structure
+	
 	for k in range(dim):
-		for i in range(rows*cols):
-			if(get_kth_bit(i, k) == 0 and get_kth_bit(i, k) != get_kth_bit(arr_n[i], k)):
-				temp = arr_n[i]
-				arr_n[i] = arr_n[i + int(math.pow(2, k))]
-				arr_n[i + int(math.pow(2, k))] = temp
-	print_r(arr_n)
+		for i in range(l):
+			if(get_kth_bit(i, k) == 0 and get_kth_bit(array_state[i], k) == 1):
+				temp = array_state[i]
+				array_state[i] = array_state[i + 2**k]
+				array_state[i + 2**k] = temp
+	#should be sorted array
+	print_r(array_state)
 
 
 
 
-
-start = [11, 0, 6, 10, 5, 15, 2, 3, 13, 12, 7, 8, 9, 1, 4, 14]
+#2D array is represented as a 1D array where each index 
+#is the concatened binary string of the row and column indicies
+start = list(range(16))
+shuffle(start)
+print(start)
 route(start)
