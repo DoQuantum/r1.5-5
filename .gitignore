@@ -1,0 +1,15 @@
+# python
+*.pyc
+__pycache__/
+
+# editors
+.*.swp
+*~
+
+# jupyter
+*-checkpoint.*
+.*.db
+
+# data
+*.png
+tmp*

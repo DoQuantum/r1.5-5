@@ -2,7 +2,7 @@ from sympy.combinatorics import Permutation
 from random import shuffle
 import math
 
-from print import print_r
+from print import *
 
 def get_kth_bit(n, k):
 	return n >> k & 1
@@ -14,6 +14,7 @@ def generate_swaps(red, green, blue):
 
 	:param red: edges 
 	"""
+	print_e(red, green, blue)
 
 	found = set()
 	perfect_matching = set()
