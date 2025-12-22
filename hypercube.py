@@ -18,6 +18,7 @@ def generate_swaps(red, green, blue):
 	found = set()
 	perfect_matching = set()
 	sigma1 = []
+	cycle_sizes =[]
 	for i in range(len(red)):
 		sigma1.append(i)
 	
@@ -32,6 +33,7 @@ def generate_swaps(red, green, blue):
 		next = red[i]
 		#iterate through cycle containing current red edge
 		while(not(next in found)):
+			found.add(red[i])
 			if(last_green):
 				if(blue[next] == -1):
 					found.add(next)
@@ -49,17 +51,18 @@ def generate_swaps(red, green, blue):
 					matching2.add((next, green[next]))
 				next = green[next]
 				last_green = True
-			
-		
 		if(len(matching1)>len(matching2) and len(matching2) != 0):
 			perfect_matching.update(matching2)
+			cycle_sizes.append(len(matching2))
 		else:
 			perfect_matching.update(matching1)
-	
+			cycle_sizes.append(len(matching1))
+		
 	for i in perfect_matching:
 		sigma1[i[0]] = i[1]
 		sigma1[i[1]] = i[0]
 	#return green edges in perfect matching
+	print(cycle_sizes)
 	return sigma1
 
 def route(initial_state:list[int]):
@@ -128,22 +131,29 @@ def route(initial_state:list[int]):
 					blue[match] = i
 		# swaps in current step in array and cyclic form
 		bit_swaps = generate_swaps(red, green, blue)
+		num_red_edges = 0
+		for i in red:
+			if i != -1:
+				num_red_edges += 1
 		sigma1 = Permutation(bit_swaps)
-		print(sigma1)
+		#print(sigma1)
 		#perform sigma1 on the "physical array" and update sigma for the "recursive step"
 		sigma = sigma1 * sigma * sigma1
 		array_state = sigma1(array_state)
-		print(array_state)
+		#print(array_state)
 	
 	#Pairs on the wrong side of the cut are swapped
 	#Reverse order of the matching step to mimic recursive structure
-	
 	for k in range(dim):
+		swaps = []
 		for i in range(l):
 			if(get_kth_bit(i, k) == 0 and get_kth_bit(array_state[i], k) == 1):
 				temp = array_state[i]
 				array_state[i] = array_state[i + 2**k]
 				array_state[i + 2**k] = temp
+				swaps.append((i, i+2**k))
+		#if(len(swaps)>0):
+			#print(swaps)
 	#should be sorted array
 	print_r(array_state)
 
