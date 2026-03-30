@@ -127,14 +127,16 @@ def apply_network(wires, stages):
 
     return w
 
-target = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]
+if __name__ == '__main__':
+	n = 16
+	target = list(range(n))
 
-shuffle(target)
-print(target)
-swaps = waksman_route(target)
-    
-print("SWAPS")
-for k, stage in enumerate(swaps):
-    print(f"Stage {k}: {stage}")
+	shuffle(target)
+	print(target)
+	swaps = waksman_route(target)
 
-print(apply_network(target, swaps))
+	print("SWAPS")
+	for k, stage in enumerate(swaps):
+	    print(f"Stage {k}: {stage}")
+
+	print(apply_network(target, swaps))

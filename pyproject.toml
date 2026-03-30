@@ -1,10 +1,11 @@
 [project]
 name = "r1.5-5"
 version = "0.1.0"
-requires-python = ">=3.14"
+requires-python = ">=3.11"
 dependencies = [
     "matplotlib>=3.10.8",
     "networkx>=3.6.1",
     "scipy>=1.16.3",
     "sympy>=1.14.0",
+    "tqdm>=4.67.3",
 ]
